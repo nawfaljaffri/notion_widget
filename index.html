@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-color: #f0f0f0;
+        }
+
+        #pomodoro-container {
+            width: 669px;
+            height: 318px;
+            position: relative;
+            background: #F8F8F8;
+            box-shadow: 0px 4px 15px 1px rgba(0, 0, 0, 0.15);
+            border-radius: 20px;
+        }
+
+        .timer {
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            position: absolute;
+            color: rgba(0, 0, 0, 0.60);
+            font-size: 80px; /* Adjusted font size for better readability */
+            font-family: Inter, sans-serif;
+            font-weight: 700;
+            word-wrap: break-word;
+        }
+
+        .button-container {
+            width: 436px;
+            height: 54px;
+            left: 117px;
+            top: 224px;
+            position: absolute;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .button {
+            width: 120px; /* Adjusted button width */
+            height: 54px;
+            background: #626161;
+            box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.15) inset;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: white;
+            font-size: 16px; /* Adjusted font size for better fit */
+            font-family: Inter, sans-serif;
+            font-weight: 700;
+            transition: all 0.2s ease-in-out;
+        }
+
+        .button:hover {
+            background: #505050;
+        }
+
+        .settings-container {
+            width: 38px;
+            height: 37.47px;
+            left: 25px;
+            top: 19px;
+            position: absolute;
+            cursor: pointer;
+        }
+
+        .settings-icon {
+            width: 29.57px;
+            height: 29.98px;
+            left: 4.21px;
+            top: 3.75px;
+            position: absolute;
+            background: rgba(0, 0, 0, 0.50);
+        }
+
+        .settings-popup {
+            display: none;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            padding: 20px;
+            background: #F8F8F8;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            z-index: 2;
+        }
+
+        .settings-popup label {
+            display: block;
+            margin-bottom: 10px;
+            color: rgba(0, 0, 0, 0.75);
+            font-size: 16px;
+            font-family: Inter, sans-serif;
+            font-weight: 600;
+        }
+
+        .settings-popup input {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+            font-size: 14px;
+        }
+
+        .settings-popup button {
+            background-color: #626161;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            font-family: Inter, sans-serif;
+            font-weight: 700;
+        }
+
+        .settings-popup button:hover {
+            background-color: #505050;
+        }
+
+    </style>
+</head>
+<body>
+
+<div id="pomodoro-container">
+    <div class="timer" id="timerDisplay">25:00</div>
+    <div class="button-container">
+        <div class="button" id="startButton" onclick="startTimer()">Start</div>
+        <div class="button" id="pauseButton" onclick="togglePause()">Pause</div>
+        <div class="button" id="stopButton" onclick="stopTimer()">Stop</div>
+    </div>
+    <div class="settings-container" onclick="toggleSettingsPopup()">
+        <div class="settings-icon"></div>
+    </div>
+    <div class="settings-popup" id="settingsPopup">
+        <label for="timeInput">Set Pomodoro Time (minutes):</label>
+        <input type="number" id="timeInput" min="0" max="60" step="1" value="25">
+        <button onclick="applySettings()">Apply</button>
+    </div>
+</div>
+
+<script>
+    let timer;
+    let initialTime = 25 * 60; // Initial time in seconds (25 minutes)
+    let timeLeft = initialTime;
+    let isPaused = false;
+
+    function startTimer() {
+        if (!isPaused && !timer) {
+            timer = setInterval(updateTimer, 1000);
+        }
+        animateButton('startButton');
+    }
+
+    function updateTimer() {
+        if (!isPaused) {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+
+            document.querySelector('#timerDisplay').innerText = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+
+            if (timeLeft === 0) {
+                clearInterval(timer);
+                // You can add additional logic when the timer reaches 0 (e.g., play a sound)
+            } else {
+                timeLeft--;
+            }
+        }
+    }
+
+    function togglePause() {
+        isPaused = !isPaused;
+
+        if (isPaused) {
+            clearInterval(timer);
+            document.getElementById('pauseButton').innerText = 'Resume';
+        } else {
+            timer = setInterval(updateTimer, 1000);
+            document.getElementById('pauseButton').innerText = 'Pause';
+        }
+        animateButton('pauseButton');
+    }
+
+    function stopTimer() {
+        clearInterval(timer);
+        timer = null; // Added to prevent speeding up on multiple clicks
+        timeLeft = initialTime;
+        document.querySelector('#timerDisplay').innerText = '25:00';
+        isPaused = false;
+        document.getElementById('pauseButton').innerText = 'Pause';
+        animateButton('stopButton');
+    }
+
+    function toggleSettingsPopup() {
+        const popup = document.getElementById('settingsPopup');
+        popup.style.display = popup.style.display === 'none' ? 'block' : 'none';
+        animateButton('settingsPopup');
+    }
+
+    function applySettings() {
+        const newTime = parseInt(document.getElementById('timeInput').value, 10);
+        if (!isNaN(newTime) && newTime >= 0 && newTime <= 60) {
+            initialTime = newTime * 60;
+            timeLeft = initialTime;
+            document.querySelector('#timerDisplay').innerText = `${newTime}:00`;
+        }
+        toggleSettingsPopup();
+        animateButton('settingsPopup');
+    }
+
+    function animateButton(buttonId) {
+        const button = document.getElementById(buttonId);
+        button.style.transform = 'scale(1.1)';
+        setTimeout(() => {
+            button.style.transform = 'scale(1)';
+        }, 100);
+    }
+</script>
+
+</body>
+</html>
